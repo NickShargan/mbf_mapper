@@ -4,6 +4,16 @@ This package can be used to estimate myocardial perfusion and visualise correspo
 
 ![image](./docs/mbf_map.png)
 
+
+<!-- ### Input
+
+Perfusion DICOM series, blood pool (e.g. left ventricle) & Myocardium segmentation masks:
+
+![image](./docs/perfusion.gif) ![image](./docs/ventr_mask.png) ![image](./docs/myo_mask.png)
+
+Blood pool (e.g. left ventricle) & Myocardium segmentation masks: -->
+
+
 ## Installation
 
 The package can be installed by:

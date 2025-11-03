@@ -3,5 +3,6 @@ opencv
 pydicom
 SimpleITK
 plotly
-matplotlib
+kaleido
+# matplotlib
 scipy

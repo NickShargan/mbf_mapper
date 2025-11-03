@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -54,7 +55,7 @@ def plot_mbf_map(mbf_map, out_map_path=Path("mbf_map.png")):
     """Creates mbf_map.png with defined MBF map."""
     fig = go.Figure(
         data=go.Heatmap(
-            z=mbf_map,
+            z=np.flipud(mbf_map),
             colorscale="Hot",
             colorbar=dict(title="mL/g/min"),
         )
