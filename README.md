@@ -68,3 +68,7 @@ pytest
 6) Sanity check for one of a random pixel (TBD since curves don't match):
 
 ![image](./docs/sanity_check_single_pix.png)
+
+without applying zero-clipping to the impulse response function:
+
+![image](./docs/sanity_check_single_pix_no_zclip.png)
