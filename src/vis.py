@@ -1,0 +1,71 @@
+from pathlib import Path
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+
+def plot_sanity_check(times_np, aif_t, Y_tN, myo_idx, y_recon, h_one):
+    """Creates sanity_check.png for a random MYO pixel to ensure that h(t) was found correctly."""
+    
+    fig = make_subplots(
+        rows=1, cols=3,
+        subplot_titles=["AIF(t)", "Fit", "h(t)"],
+        horizontal_spacing=0.08,
+    )
+
+    # 1) AIF(t)
+    fig.add_trace(
+        go.Scatter(x=times_np, y=aif_t, mode="lines", name="AIF"),
+        row=1, col=1
+    )
+
+    # 2) Fit: measured vs recon
+    fig.add_trace(
+        go.Scatter(x=times_np, y=Y_tN[:, myo_idx], mode="lines", name="MYO"),
+        row=1, col=2
+    )
+    fig.add_trace(
+        go.Scatter(x=times_np, y=y_recon, mode="lines", name="recon", line=dict(dash="dash")),
+        row=1, col=2
+    )
+
+    # 3) h(t)
+    fig.add_trace(
+        go.Scatter(x=times_np, y=h_one, mode="lines", name="h(t)"),
+        row=1, col=3
+    )
+
+    # axes labels + layout
+    fig.update_xaxes(title_text="s", row=1, col=1)
+    fig.update_xaxes(title_text="s", row=1, col=2)
+    fig.update_xaxes(title_text="s", row=1, col=3)
+
+    fig.update_layout(
+        height=350,
+        width=1000,
+        showlegend=True,
+        title_text="Sanity check on a random ROI pixel",
+    )
+
+    fig.write_image("sanity_check.png", scale=2)
+
+
+def plot_mbf_map(mbf_map, out_map_path=Path("mbf_map.png")):
+    """Creates mbf_map.png with defined MBF map."""
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=mbf_map,
+            colorscale="Hot",
+            colorbar=dict(title="mL/g/min"),
+        )
+    )
+
+    fig.update_layout(
+        title="MBF (mL/g/min)",
+        height=500,
+        width=500,
+        # xaxis=dict(showticklabels=False),
+        # yaxis=dict(showticklabels=False),
+    )
+
+    fig.write_image(out_map_path, scale=2)

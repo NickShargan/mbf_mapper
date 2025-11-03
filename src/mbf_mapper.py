@@ -1,13 +1,12 @@
 import argparse
 from pathlib import Path
 
-import cv2
 import numpy as np
 from numpy.fft import rfft, irfft
-import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 from utils import read_perf_dcm, get_perf_ts, read_roi_masks
+from vis import plot_mbf_map, plot_sanity_check
 
 
 def get_aif_curve(vol, mask_bpool):
@@ -90,7 +89,7 @@ def fit_fermi_per_pixel(t, h_col, aif_peak_t,
     except Exception:
         # Fallback: h(0) as MBF estimate if fit fails
         return float(h_col[0]), (np.nan, ) * 4
-
+    
 
 def map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=False):
     """
@@ -152,15 +151,9 @@ def map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=False):
         # Sanity check on a random ROI pixel
         idx = np.random.randint(0, roi_pix_num)
         h_one = h_tN[:, idx]
-        y_hat = np.convolve(aif_t, h_one)[ : T] * dt_s
+        y_recon = np.convolve(aif_t, h_one)[ : T] * dt_s
 
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(9, 3))
-        plt.subplot(1, 3, 1); plt.plot(times_np, aif_t); plt.title("AIF(t)"); plt.xlabel("s")
-        plt.subplot(1, 3, 2); plt.plot(times_np, Y_tN[:, idx], label="MYO"); plt.plot(times_np, y_hat, '--', label="recon"); plt.legend(); plt.title("Fit")
-        plt.subplot(1, 3, 3); plt.plot(times_np, h_one); plt.title("h(t)"); plt.xlabel("s")
-        plt.tight_layout(); 
-        plt.savefig("sanity_check.png")
+        plot_sanity_check(times_np, aif_t, Y_tN, idx, y_recon, h_one)
 
     return mbf_map
 
@@ -193,12 +186,12 @@ def main():
     #     default=1e-2,
     #     help="Wiener deconvolution regularization parameter (default: 1e-2)."
     # )
-    # parser.add_argument(
-    #     "--out_dir",
-    #     type=Path,
-    #     default=Path("./"),
-    #     help="Output directory for results (default: current directory)."
-    # )
+    parser.add_argument(
+        "--out_dir",
+        type=Path,
+        default=Path("./"),
+        help="Output directory for results (default: current directory)."
+    )
 
     args = parser.parse_args()
 
@@ -210,11 +203,9 @@ def main():
 
     if args.vis_check:
         out_map_path = args.out_dir / "mbf_map.png"
-        cv2.imwrite(str(out_map_path), mbf_map_np)
+        plot_mbf_map(mbf_map_np, out_map_path)
         print(f"Saved MBF map to {out_map_path}")
 
 
 if __name__ == "__main__":
     main()
-
-
