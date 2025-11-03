@@ -1,6 +1,3 @@
-import argparse
-from pathlib import Path
-
 import numpy as np
 from numpy.fft import rfft, irfft
 from scipy.optimize import curve_fit
@@ -38,7 +35,7 @@ def wiener_deconv_all(aif, Y_tN, dt, alpha=1e-2):
     returns h_tN: (T, N)
     """
     T, N = Y_tN.shape
-    n = next_pow2(2*T)  # zero-pad to avoid circular wrap-around
+    n = next_pow2(2 * T)  # zero-pad to avoid circular wrap-around
 
     a_pad = np.pad(aif, (0, n - T))
     A = rfft(a_pad)                              # (F,)
@@ -70,7 +67,7 @@ def fit_fermi_per_pixel(t, h_col, aif_peak_t,
     aif_peak_t is a reasonable initial guess for arrival scale.
     """
     if not np.any(h_col > 0):
-        return np.nan, (np.nan,)*4
+        return np.nan, (np.nan,) * 4
 
     T = len(t)
     duration = t[-1] - t[0]
@@ -116,7 +113,7 @@ def map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=False):
     T, H, W = vol_myo.shape
 
     # Ensure mask is boolean and 2-D
-    mask_myo = mask_myo.astype(bool)           # (H, W)
+    mask_myo = mask_myo.astype(bool)
 
     # Build matrix of myocardial curves only where mask is true
     roi_idx = np.argwhere(mask_myo)
@@ -124,13 +121,13 @@ def map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=False):
 
     # Extract only masked pixels across time
     T, H, W = vol_myo.shape
-    Y_tN = vol_myo[:, mask_myo]                # result: (T, N)
-    print(aif_t.shape)                         # (58,)
-    print(Y_tN.shape)                          # (58, N)  — good
+    Y_tN = vol_myo[:, mask_myo]
+    print("AIF_curve.shape: ", aif_t.shape)
+    print("MYO(t).shape: ", Y_tN.shape)
 
     # Deconvolution (vectorized)
     alpha = 1e-2
-    h_tN = wiener_deconv_all(aif_t, Y_tN, dt_s, alpha=alpha)  # (T, N)
+    h_tN = wiener_deconv_all(aif_t, Y_tN, dt_s, alpha=alpha)
 
     vol_myo = np.where(mask_myo, vol_np, 0)
 
@@ -157,55 +154,3 @@ def map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=False):
 
     return mbf_map
 
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Compute myocardial blood flow (MBF) map from DICOM perfusion series and TIFF masks."
-    )
-
-    parser.add_argument(
-        "--dcm_series",
-        type=Path,
-        required=True,
-        help="Path to DICOM perfusion series directory."
-    )
-    parser.add_argument(
-        "--tiff_masks",
-        type=Path,
-        required=True,
-        help="Path to TIFF file containing left ventricle and myocardium masks."
-    )
-    parser.add_argument(
-        "--vis_check",
-        action="store_true",
-        help="If set, saves sanity_check.png for visualization."
-    )
-    # parser.add_argument(
-    #     "--alpha",
-    #     type=float,
-    #     default=1e-2,
-    #     help="Wiener deconvolution regularization parameter (default: 1e-2)."
-    # )
-    parser.add_argument(
-        "--out_dir",
-        type=Path,
-        default=Path("./"),
-        help="Output directory for results (default: current directory)."
-    )
-
-    args = parser.parse_args()
-
-    mbf_map_np = map_mbf(
-        args.dcm_series,
-        args.tiff_masks,
-        is_vis_check=args.vis_check
-    )
-
-    if args.vis_check:
-        out_map_path = args.out_dir / "mbf_map.png"
-        plot_mbf_map(mbf_map_np, out_map_path)
-        print(f"Saved MBF map to {out_map_path}")
-
-
-if __name__ == "__main__":
-    main()

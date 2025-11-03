@@ -23,9 +23,20 @@ pip install -e .
 ```
 
 ## Usage
+Ensure that MotionCorrectedPerfusionSeries/ and AIF_And_Myo_Masks.tiff are placed into ./data/ directory. Then, run:
 
 ```
-python src/mbf_mapper.py --dcm_series ./data/MotionCorrectedPerfusionSeries/ --tiff_masks ./data/AIF_And_Myo_Masks.tiff 
+python ./examples/demo.py
+```
+
+## CLI
+
+After installation mpf-mapper can be used by CLI:
+
+```
+mpf-mapper --dcm_series ./data/MotionCorrectedPerfusionSeries/ \
+           --tiff_masks ./data/AIF_And_Myo_Masks.tiff \
+           --vis_check
 ```
 
 ## How it works

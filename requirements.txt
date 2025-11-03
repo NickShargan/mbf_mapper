@@ -4,5 +4,5 @@ pydicom
 SimpleITK
 plotly
 kaleido
-# matplotlib
 scipy
+pytest

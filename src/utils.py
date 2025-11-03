@@ -55,10 +55,11 @@ def read_roi_masks(tiff_masks_path):
     if not success:
         raise ValueError("Could not read TIFF file")
 
-    print(f"Number of masks: {len(images)}")
-    print(f"Shape of first mask: {images[0].shape}")
-
+    print(f"Number of masks extracted from {tiff_masks_path}: {len(images)}")
+    
     mask_ventr = images[0]
     mask_myo = images[1]
+
+    print(f"mask_myo.shape: {mask_myo.shape}")
 
     return mask_ventr, mask_myo
