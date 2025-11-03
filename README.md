@@ -39,6 +39,12 @@ mpf-mapper --dcm_series ./data/MotionCorrectedPerfusionSeries/ \
            --vis_check
 ```
 
+Run pytests to ensure that it works as expected:
+
+```
+pytest
+```
+
 ## How it works
 
 1) AIF curve is extracted based on average SI(signal intensity) change over time:
