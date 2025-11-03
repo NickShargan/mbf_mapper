@@ -1,0 +1,7 @@
+numpy
+opencv
+pydicom
+SimpleITK
+plotly
+matplotlib
+scipy
