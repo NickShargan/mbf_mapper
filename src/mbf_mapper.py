@@ -1,5 +1,4 @@
 import argparse
-import os
 from pathlib import Path
 
 import cv2
@@ -7,66 +6,8 @@ import numpy as np
 from numpy.fft import rfft, irfft
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-import SimpleITK as sitk
-import pydicom
 
-
-def get_perf_ts(dcm_series_path):
-    """Reads timestamps from DICOM series with perfusion."""
-    filenames = os.listdir(dcm_series_path)
-
-    times = []
-    for filename in filenames:
-        ds = pydicom.dcmread(dcm_series_path / filename, stop_before_pixels=True)
-        ts_str = getattr(ds, "AcquisitionTime", None) or getattr(ds, "ContentTime", None)
-        if ts_str and len(ts_str) >= 6:
-            # convert to seconds
-            h, m, s = int(ts_str[ : 2]), int(ts_str[2 : 4]), float(ts_str[4 : ])
-            times.append(h * 3600 + m * 60 + s)
-
-    times = sorted(times)
-    # print(times)
-    # dt_s = np.mean(np.diff(times)) if len(times) > 1 else None
-    print("time diffs, sec: ", np.diff(times))
-    # print(f"Estimated frame spacing: {dt_s:.3f} s")
-
-    times_np = np.asarray(times)
-    times_np = times_np - times_np[0]
-
-    return times_np
-
-
-def read_perf_dcm(dcm_series_path):
-    """Reads dicom series with perfusion."""
-
-    # volume
-    reader = sitk.ImageSeriesReader()
-    files = reader.GetGDCMSeriesFileNames(dcm_series_path)
-    reader.SetFileNames(files)
-    img = reader.Execute()
-
-    arr = sitk.GetArrayFromImage(img)
-    vol_np = arr.astype(np.float32)
-
-    return vol_np
-
-
-def read_roi_masks(tiff_masks_path):
-    """Reads RoI masks of left ventricle and myocardium."""
-
-    # load all pages from the TIFF
-    success, images = cv2.imreadmulti(tiff_masks_path, [], cv2.IMREAD_UNCHANGED)
-
-    if not success:
-        raise ValueError("Could not read TIFF file")
-
-    print(f"Number of masks: {len(images)}")
-    print(f"Shape of first mask: {images[0].shape}")
-
-    mask_ventr = images[0]
-    mask_myo = images[1]
-
-    return mask_ventr, mask_myo
+from utils import read_perf_dcm, get_perf_ts, read_roi_masks
 
 
 def get_aif_curve(vol, mask_bpool):
@@ -88,6 +29,7 @@ def get_aif_curve(vol, mask_bpool):
 
 def next_pow2(x):
     return 1 << (int(x - 1).bit_length())
+
 
 def wiener_deconv_all(aif, Y_tN, dt, alpha=1e-2):
     """
@@ -114,6 +56,7 @@ def wiener_deconv_all(aif, Y_tN, dt, alpha=1e-2):
 
 
 def fermi_impulse(t, F, t0, k, tau):
+    """Fermi function defined in Jerosch-Herold, 1998"""
     # h(t) = F * exp(-(t - t0)/tau) / (1 + exp((t - t0)/k))
     t = np.asarray(t, dtype=np.float64)
     decay   = np.exp(-np.clip(t - t0, 0, None) / (tau + 1e-8))
@@ -222,13 +165,56 @@ def map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=False):
     return mbf_map
 
 
+def main():
+    parser = argparse.ArgumentParser(
+        description="Compute myocardial blood flow (MBF) map from DICOM perfusion series and TIFF masks."
+    )
+
+    parser.add_argument(
+        "--dcm_series",
+        type=Path,
+        required=True,
+        help="Path to DICOM perfusion series directory."
+    )
+    parser.add_argument(
+        "--tiff_masks",
+        type=Path,
+        required=True,
+        help="Path to TIFF file containing left ventricle and myocardium masks."
+    )
+    parser.add_argument(
+        "--vis_check",
+        action="store_true",
+        help="If set, saves sanity_check.png for visualization."
+    )
+    # parser.add_argument(
+    #     "--alpha",
+    #     type=float,
+    #     default=1e-2,
+    #     help="Wiener deconvolution regularization parameter (default: 1e-2)."
+    # )
+    # parser.add_argument(
+    #     "--out_dir",
+    #     type=Path,
+    #     default=Path("./"),
+    #     help="Output directory for results (default: current directory)."
+    # )
+
+    args = parser.parse_args()
+
+    mbf_map_np = map_mbf(
+        args.dcm_series,
+        args.tiff_masks,
+        is_vis_check=args.vis_check
+    )
+
+    if args.vis_check:
+        out_map_path = args.out_dir / "mbf_map.png"
+        cv2.imwrite(str(out_map_path), mbf_map_np)
+        print(f"Saved MBF map to {out_map_path}")
+
+
 if __name__ == "__main__":
-    tiff_masks_path = Path("./data/AIF_And_Myo_Masks.tiff")
-    dcm_series_path = Path("./data/MotionCorrectedPerfusionSeries/")
-    is_vis = True
+    main()
 
-    mbf_map_np = map_mbf(dcm_series_path, tiff_masks_path, is_vis_check=True)
-
-    if is_vis:
-        cv2.imwrite("mbf_map.png", mbf_map_np)
 

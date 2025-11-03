@@ -12,11 +12,10 @@ The package can be installed by:
 pip install -e .
 ```
 
-
 ## Usage
 
 ```
-python ./src/mbf_mapper.py
+python src/mbf_mapper.py --dcm_series ./data/MotionCorrectedPerfusionSeries/ --tiff_masks ./data/AIF_And_Myo_Masks.tiff 
 ```
 
 ## How it works
