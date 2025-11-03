@@ -59,6 +59,16 @@ pytest
 
 ![image](./docs/h_conv_func.png)
 
+if h(t) applyed to AIF reconstructed MYO(t) is:
+
+![image](./docs/myo_pix_convoluted.png)
+
+and without zero-clipping for h(t):
+
+![image](./docs/myo_pix_convoluted_no_zclip.png)
+
+The shape is quite similar to the original MYO(t) for both cases, but amplitude is ~2 times higher when zero-clipping is applied.
+
 4) Defining Fermi model parameters that correspond observed dynamics of perfussion. Example for one of pixels:
 
 ![image](./docs/fermi_impulse_resp.png)
