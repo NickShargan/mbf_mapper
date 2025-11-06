@@ -82,3 +82,18 @@ The shape is quite similar to the original MYO(t) for both cases, but amplitude 
 without applying zero-clipping to the impulse response function:
 
 ![image](./docs/sanity_check_single_pix_no_zclip.png)
+
+
+## C++ implementation
+
+Build and run:
+
+```
+cd cpp
+mkdir build
+cd build
+cmake -DITK_DIR=~/ITK/build ..          
+make 
+
+./mbf_cli ../../data/MotionCorrectedPerfusionSeries/ ../../data/AIF_And_Myo_Masks.tiff ../mbf_map.png
+```
