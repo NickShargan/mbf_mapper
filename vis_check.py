@@ -91,8 +91,9 @@ def main():
 
     plot_sanity_check(times, aif_t, myo_pix_t, myo_pix_conv_t, h_t)
 
-    img = sitk.ReadImage("./cpp/mbf_map.nii")
+    img = sitk.ReadImage("./mbf_map.nii")
     mbf_map = sitk.GetArrayFromImage(img)
+    mbf_map[mbf_map == 0] = np.nan
     plot_mbf_map(mbf_map)
 
 
