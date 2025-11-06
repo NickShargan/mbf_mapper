@@ -12,13 +12,13 @@ int main(int argc, char* argv[])
 {
     if (argc < 4) {
         std::cerr << "Usage: " << argv[0]
-                  << " <dicom_dir> <mask.tiff> <output.png>\n";
+                  << " <dicom_dir> <mask.tiff> <output.nii>\n";
         return EXIT_FAILURE;
     }
 
     const std::string dicomDir = argv[1];
     const std::string tiffPath = argv[2];
-    const std::string outPng   = argv[3];
+    const std::string outNii   = argv[3];
 
     try {
         auto fileNames = GetDicomFileNames(dicomDir);
@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
         WriteVectorToCSV(aifCurve, times, "aif.csv", "AIF");
 
         auto mbfMap = ComputeMbfMap(perf, times, maskMyo, aifCurve);
-
-        SaveMbfMapAsPng(mbfMap, outPng);
+        
+        SaveMbfMapAsNifti(mbfMap, outNii);
     }
     catch (const std::exception& ex) {
         std::cerr << "Error: " << ex.what() << "\n";
