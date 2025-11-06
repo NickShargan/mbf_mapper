@@ -16,7 +16,6 @@ Blood pool (e.g. left ventricle) & Myocardium segmentation masks: -->
 Build and run:
 
 ```
-cd cpp
 mkdir build
 cd build
 cmake -DITK_DIR=~/ITK/build ..          
