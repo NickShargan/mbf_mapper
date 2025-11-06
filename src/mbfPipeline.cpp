@@ -2,6 +2,7 @@
 
 #include "mbfPipeline.hpp"
 #include "MbfDeconvolver.hpp"
+#include "utils.hpp"
 
 Eigen::MatrixXd ComputeMbfMap(
     PerfImageType::Pointer perf,
@@ -18,6 +19,7 @@ Eigen::MatrixXd ComputeMbfMap(
     Eigen::MatrixXd mbfMap = Eigen::MatrixXd::Zero(H, W);
 
     MbfDeconvolver deconv(aifCurve, 0.02);
+    // todo: mode rho to config.hpp
     const double rho = 1.05;
     const double dt  = times.size() > 1 ? (times[1] - times[0]) : 1.0;
 
@@ -25,6 +27,8 @@ Eigen::MatrixXd ComputeMbfMap(
         Mask2DType::IndexType idx = { {x, y} };
         return myoMask->GetPixel(idx) != 0;
     };
+
+    bool isTestSaved = false;
 
     for (int y = 0; y < static_cast<int>(H); ++y) {
         for (int x = 0; x < static_cast<int>(W); ++x) {
@@ -41,6 +45,20 @@ Eigen::MatrixXd ComputeMbfMap(
             double h0 = deconv.computeMBF(curve);
             double mbf = (h0 / dt) * 60.0 / rho;
             mbfMap(y, x) = mbf;
+
+            // std::cout << mbf << "\n";
+
+            // save test
+            if (!isTestSaved) {
+                auto h = deconv.deconvolve(curve);
+
+                std::vector<double> h_vec(h.data(), h.data() + h.size());
+
+                WriteVectorToCSV(curve, times, "myo_pix.csv", "MYO_pix");
+                WriteVectorToCSV(h_vec, times, "h_t.csv", "h_t_svd");
+
+                isTestSaved = true;
+            }
         }
     }
 

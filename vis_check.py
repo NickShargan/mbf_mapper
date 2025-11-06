@@ -1,11 +1,15 @@
 from pathlib import Path
-
+import pandas as pd
 import numpy as np
+import SimpleITK as sitk
+
+# from .src.vis import plot_sanity_check
+
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def plot_sanity_check(times_np, aif_t, Y_tN, myo_idx, y_recon, h_one):
+def plot_sanity_check(times_np, aif_t, myo_pix_t, y_recon, h_one):
     """Creates sanity_check.png for a random MYO pixel to ensure that h(t) was found correctly."""
     
     fig = make_subplots(
@@ -22,7 +26,7 @@ def plot_sanity_check(times_np, aif_t, Y_tN, myo_idx, y_recon, h_one):
 
     # 2) Fit: measured vs recon
     fig.add_trace(
-        go.Scatter(x=times_np, y=Y_tN[:, myo_idx], mode="lines", name="MYO"),
+        go.Scatter(x=times_np, y=myo_pix_t, mode="lines", name="MYO"),
         row=1, col=2
     )
     fig.add_trace(
@@ -49,6 +53,7 @@ def plot_sanity_check(times_np, aif_t, Y_tN, myo_idx, y_recon, h_one):
     )
 
     fig.write_image("sanity_check.png", scale=2)
+    print("saved to sanity_check.png")
 
 
 def plot_mbf_map(mbf_map, out_map_path=Path("mbf_map.png")):
@@ -70,3 +75,26 @@ def plot_mbf_map(mbf_map, out_map_path=Path("mbf_map.png")):
     )
 
     fig.write_image(out_map_path, scale=2)
+
+
+def main():
+    aif_cpp_df = pd.read_csv("./build/aif.csv")
+    myo_pix_cpp_df = pd.read_csv("./build/myo_pix.csv")
+    h_t_cpp_df = pd.read_csv("./build/h_t.csv")
+
+    times = aif_cpp_df["Time_s"].values
+    aif_t = aif_cpp_df["AIF"].values
+    myo_pix_t = myo_pix_cpp_df["MYO_pix"].values
+    h_t = h_t_cpp_df["h_t_svd"].values
+
+    myo_pix_conv_t = np.convolve(aif_t, h_t)
+
+    plot_sanity_check(times, aif_t, myo_pix_t, myo_pix_conv_t, h_t)
+
+    img = sitk.ReadImage("./cpp/mbf_map.nii")
+    mbf_map = sitk.GetArrayFromImage(img)
+    plot_mbf_map(mbf_map)
+
+
+if __name__ == "__main__":
+    main()
