@@ -29,7 +29,7 @@ Ensure that MotionCorrectedPerfusionSeries/ and AIF_And_Myo_Masks.tiff are place
 ./mbf_cli ../data/MotionCorrectedPerfusionSeries/ ../data/AIF_And_Myo_Masks.tiff ../mbf_map.nii
 ```
 
-### Sanity check for one of a random pixel
+### Sanity check for one of pixels
 
 ```
 # install dependencies if needed

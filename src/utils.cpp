@@ -117,3 +117,15 @@ void WriteVectorToCSV(const std::vector<double>& vals,
         file << timesSec[i] << "," << vals[i] << "\n";
     }
 }
+
+void zeroLeveling(std::vector<double>& signal){
+    if (signal.size() < 3) {
+        return;
+    }
+    // zero-leveling
+    double offset = (signal[0] + signal[1] + signal[2]) / 3;
+
+    for(int idx = 0; idx < signal.size(); ++idx){
+        signal[idx] -= offset;
+    }
+}

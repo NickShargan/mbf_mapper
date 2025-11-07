@@ -9,3 +9,5 @@ void WriteVectorToCSV(const std::vector<double>& vals,
                       const std::vector<double>& timesSec,
                       const std::string& outPath,
                       const std::string& valColName);
+
+void zeroLeveling(std::vector<double>& signal);
