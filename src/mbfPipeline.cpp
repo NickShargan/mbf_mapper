@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "mbfPipeline.hpp"
-#include "MbfDeconvolver.hpp"
+// #include "MbfDeconvolver.hpp"
 #include "MbfFermiFitter.hpp"
 #include "utils.hpp"
 
@@ -56,10 +56,7 @@ Eigen::MatrixXd ComputeMbfMap(
             // double h0 = h_t[0];
             double h0 = h_t.maxCoeff();
             double mbf = (h0 / dt) * 60.0 / rho;
-            // double mbf = (h0 / dt) * 60.0 / rho;
             mbfMap(y, x) = mbf;
-
-            // std::cout << mbf << "\n";
 
             // save test
             if (!isTestSaved) {

@@ -13,6 +13,7 @@ set(SOURCES
     src/ioMasks.cpp
     src/mbfPipeline.cpp
     src/MbfDeconvolver.cpp
+    src/MbfFermiFitter.cpp
 )
 
 add_executable(mbf_cli ${SOURCES})
