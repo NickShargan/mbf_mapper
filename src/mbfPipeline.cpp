@@ -2,7 +2,7 @@
 
 #include "mbfPipeline.hpp"
 #include "MbfDeconvolver.hpp"
-// #include "MbfFermiFitter.hpp"
+#include "MbfFermiFitter.hpp"
 #include "utils.hpp"
 
 Eigen::MatrixXd ComputeMbfMap(
@@ -17,15 +17,16 @@ Eigen::MatrixXd ComputeMbfMap(
     const unsigned int W = size[0];
     const unsigned int H = size[1];
 
-    Eigen::MatrixXd mbfMap = Eigen::MatrixXd::Zero(H, W);
-
-    // MbfFermiFitter fitter(aifCurve, times, times[1] - times[0]);
-
-    MbfDeconvolver deconv(aifCurve, 0.02);
     // todo: mode rho to config.hpp
     const double rho = 1.05;
     const double dt  = times.size() > 1 ? (times[1] - times[0]) : 1.0;
 
+    Eigen::MatrixXd mbfMap = Eigen::MatrixXd::Zero(H, W);
+
+    MbfFermiFitter fitter(aifCurve, times, dt);
+
+    // MbfDeconvolver deconv(aifCurve, 0.02);
+    
     auto isMasked = [&](int x, int y) {
         Mask2DType::IndexType idx = { {x, y} };
         return myoMask->GetPixel(idx) != 0;
@@ -47,23 +48,25 @@ Eigen::MatrixXd ComputeMbfMap(
 
             zeroLeveling(curve);
 
-            // Eigen::Map<const Eigen::VectorXd> v(curve.data(), curve.size());
+            Eigen::Map<const Eigen::VectorXd> v(curve.data(), curve.size());
 
-            // Eigen::VectorXd h_t = fitter.fit(v);
+            Eigen::VectorXd h_t = fitter.fit(v);
 
-            double h0 = deconv.computeMBF(curve);
+            // double h0 = deconv.computeMBF(curve);
             // double h0 = h_t[0];
+            double h0 = h_t.maxCoeff();
             double mbf = (h0 / dt) * 60.0 / rho;
+            // double mbf = (h0 / dt) * 60.0 / rho;
             mbfMap(y, x) = mbf;
 
             // std::cout << mbf << "\n";
 
             // save test
             if (!isTestSaved) {
-                auto h = deconv.deconvolve(curve);
+                // auto h = deconv.deconvolve(curve);
 
-                // std::vector<double> h_vec(h_t.data(), h_t.data() + h_t.size());
-                std::vector<double> h_vec(h.data(), h.data() + h.size());
+                std::vector<double> h_vec(h_t.data(), h_t.data() + h_t.size());
+                // std::vector<double> h_vec(h.data(), h.data() + h.size());
 
                 WriteVectorToCSV(curve, times, "myo_pix.csv", "MYO_pix");
                 WriteVectorToCSV(h_vec, times, "h_t.csv", "h_t_svd");

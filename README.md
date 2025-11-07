@@ -53,9 +53,9 @@ MBF for this particular pixel was calculated based on h(0) value by the followin
 # tissue density:
 const double rho = 1.05
 
-# dt - time difference between neighbouring images/slices (0th and 1st)
+# h0 is ~0.045 ml/(ml * sec) for this pixel
 
-double mbf = (h0 / dt) * 60.0 / rho;
+double mbf = h0 * 60.0 / rho;
 ```
 
 ### MBF map
@@ -66,6 +66,6 @@ The defined MBF map is written to mbf_map.nii . It can be displayed in Slicer3D,
 
 ### Incorrect h(t) when using deconvolution
 
-Since h(t) contains oscilation (not decaying continiously) it doesn't represent targeted physiological process
+Since h(t) contains oscilation (not decaying continiously) it doesn't represent targeted physiological process. Different parameters potentially could improve that.
 
 ![image](./docs/sanity_check_deconv.png)
