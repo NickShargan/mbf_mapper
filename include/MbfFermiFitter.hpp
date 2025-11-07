@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cmath>
 
-
 class MbfFermiFitter {
 public:
     // A is convolution matrix (T x T)
@@ -120,10 +119,6 @@ private:
         h_out.resize(T);
         for (int i = 0; i < T; ++i) {
             double ti = t(i);
-            if (ti < t0) {
-                h_out(i) = 0.0;
-                continue;
-            }
 
             double x = (ti - t0);
             double logistic = 1.0 / (1.0 + std::exp(-x / (k + 1e-8)));
