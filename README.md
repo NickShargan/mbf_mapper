@@ -1,6 +1,8 @@
 # MBF mapper
 
-This package can be used to estimate myocardial perfusion and visualise corresponding map:
+This package can be used to estimate myocardial perfusion and to visualise corresponding map:
+
+![image](./docs/mbf_map.png)
 
 
 <!-- ### Input
@@ -13,7 +15,7 @@ Blood pool (e.g. left ventricle) & Myocardium segmentation masks: -->
 
 ## Compile
 
-Build and run:
+Link and build:
 
 ```
 mkdir build
@@ -36,13 +38,13 @@ Ensure that MotionCorrectedPerfusionSeries/ and AIF_And_Myo_Masks.tiff are place
 python vis_check.py
 ```
 
-h(t) - was defined by SVD deconvolution; impulse response function
+h(t) - was defined by deconvolution (SVD) or Fermi model; impulse response function
 
-MYO - concentration of contrastive substance at a specific pixel/voxel
+MYO - concentration of contrast agent at a specific pixel/voxel
 
 recon - reconstruction of MYO obtained by convoluting AIF and h(t)
 
-![image](./docs/sanity_check_single_pix.png)
+![image](./docs/sanity_check_fermi.png)
 
 ### MBF calculation (in ml/min/gr)
 MBF for this particular pixel was calculated based on h(0) value by the following logic:
@@ -61,3 +63,9 @@ double mbf = (h0 / dt) * 60.0 / rho;
 The defined MBF map is written to mbf_map.nii . It can be displayed in Slicer3D, Python(SimpleITK & Plotly) or by other visualisational tools.
 
 ![image](./docs/mbf_map.png)
+
+### Incorrect h(t) when using deconvolution
+
+Since h(t) contains oscilation (not decaying continiously) it doesn't represent targeted physiological process
+
+![image](./docs/sanity_check_deconv.png)

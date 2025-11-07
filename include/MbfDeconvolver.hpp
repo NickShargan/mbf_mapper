@@ -18,10 +18,12 @@ public:
     // convenience: get MBF directly (h(0))
     double computeMBF(const std::vector<double>& tissue) const;
 
+    static Eigen::MatrixXd buildConvMatrix(const std::vector<double>& aif);
+
 private:
     int T_;
     double rel_thresh_;
     Eigen::JacobiSVD<Eigen::MatrixXd> svd_;
 
-    static Eigen::MatrixXd buildConvMatrix(const std::vector<double>& aif);
+    
 };
